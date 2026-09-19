@@ -1,7 +1,7 @@
 # Trigonometry Masterclass with Manim 📐 ⭕
 
 [![Manim](https://img.shields.io/badge/Made_with-Manim-E24268.svg)](https://www.manim.community/)
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.11.6-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A complete, 11-part animated video series designed to teach trigonometry from the ground up. Instead of relying on rote memorization, this masterclass uses the power of **Manim (Mathematical Animation Engine)** to bridge the gap between geometric intuition and algebraic rigor. 
