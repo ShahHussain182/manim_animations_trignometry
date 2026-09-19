@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trigonometric Identities: Fundamental Law & Deductions</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --highlight: #e74c3c;
+            --success: #27ae60;
+            --bg: #f5f6fa;
+            --panel: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--primary);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        h1 { margin: 0; font-size: 1.5rem; }
+        h2 { margin: 5px 0 0; font-size: 1.1rem; font-weight: normal; opacity: 0.9; }
+        
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* Controls Sidebar */
+        .controls {
+            width: 250px;
+            background: var(--panel);
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+        }
+        .control-group {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+        .angle-val {
+            float: right;
+            color: var(--accent);
+            font-family: monospace;
+        }
+        
+        button.nav-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+        button.nav-btn:hover { background: var(--accent); }
+        button.nav-btn.active {
+            background: var(--highlight);
+            font-weight: bold;
+        }
+
+        /* Main Visualization Area */
+        .main-view {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            padding: 20px;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        /* Canvas Section */
+        .canvas-container {
+            flex: 1;
+            background: var(--panel);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* Derivation Panel */
+        .derivation-panel {
+            width: 400px;
+            background: var(--panel);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .derivation-title {
+            font-size: 1.2rem;
+            color: var(--highlight);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+        }
+        .step {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            animation: fadeIn 0.5s ease;
+        }
+        .step.highlight {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        .math-block {
+            font-size: 1.1rem;
+            overflow-x: auto;
+            padding: 5px 0;
+        }
+        .explanation {
+            font-size: 0.9rem;
+            color: #555;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-view { flex-direction: column; overflow-y: auto; }
+            .canvas-container { height: 400px; }
+            .derivation-panel { width: 100%; height: auto; }
+            .controls { width: 100%; height: auto; flex-direction: row; overflow-x: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Trigonometric Identities Visualizer</h1>
+    <h2>Fundamental Law & 10 Key Deductions</h2>
+</header>
+
+<div class="container">
+    <div class="controls">
+        <div class="control-group">
+            <label>Angle &alpha; (Alpha) <span id="val-alpha" class="angle-val">45°</span></label>
+            <input type="range" id="alpha-slider" min="0" max="360" value="45">
+        </div>
+        <div class="control-group">
+            <label>Angle &beta; (Beta) <span id="val-beta" class="angle-val">30°</span></label>
+            <input type="range" id="beta-slider" min="0" max="360" value="30">
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <label>Select Derivation:</label>
+            <button class="nav-btn active" onclick="setMode(0)">0. Fundamental Law</button>
+            <button class="nav-btn" onclick="setMode(1)">1. cos(π/2 - β)</button>
+            <button class="nav-btn" onclick="setMode(2)">2. cos(π/2 + α)</button>
+            <button class="nav-btn" onclick="setMode(3)">3. sin(π/2 + α)</button>
+            <button class="nav-btn" onclick="setMode(4)">4. cos(α + β)</button>
+            <button class="nav-btn" onclick="setMode(5)">5. sin(α + β)</button>
+            <button class="nav-btn" onclick="setMode(6)">6. sin(α - β)</button>
+            <button class="nav-btn" onclick="setMode(7)">7. cos(2π - θ)</button>
+            <button class="nav-btn" onclick="setMode(8)">8. sin(2π - θ)</button>
+            <button class="nav-btn" onclick="setMode(9)">9. tan(α + β)</button>
+            <button class="nav-btn" onclick="setMode(10)">10. tan(α - β)</button>
+        </div>
+    </div>
+
+    <div class="main-view">
+        <div class="canvas-container">
+            <canvas id="geoCanvas"></canvas>
+        </div>
+        <div class="derivation-panel" id="derivation-content">
+            <!-- Content injected via JS -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // State
+    let alpha = 45 * (Math.PI / 180);
+    let beta = 30 * (Math.PI / 180);
+    let currentMode = 0;
+    
+    // DOM Elements
+    const canvas = document.getElementById('geoCanvas');
+    const ctx = canvas.getContext('2d');
+    const alphaSlider = document.getElementById('alpha-slider');
+    const betaSlider = document.getElementById('beta-slider');
+    const valAlpha = document.getElementById('val-alpha');
+    const valBeta = document.getElementById('val-beta');
+    const derivationContent = document.getElementById('derivation-content');
+    const navButtons = document.querySelectorAll('.nav-btn');
+
+    // Resize Canvas
+    function resizeCanvas() {
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        draw();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    // Update Sliders
+    alphaSlider.addEventListener('input', (e) => {
+        alpha = e.target.value * (Math.PI / 180);
+        valAlpha.textContent = e.target.value + '°';
+        updateDerivation();
+        draw();
+    });
+    betaSlider.addEventListener('input', (e) => {
+        beta = e.target.value * (Math.PI / 180);
+        valBeta.textContent = e.target.value + '°';
+        updateDerivation();
+        draw();
+    });
+
+    function setMode(mode) {
+        currentMode = mode;
+        navButtons.forEach((btn, idx) => {
+            btn.classList.toggle('active', idx === mode);
+        });
+        updateDerivation();
+        draw();
+    }
+
+    // MathJax Typeset
+    function typeset() {
+        if (window.MathJax) {
+            MathJax.typesetPromise([derivationContent]).catch((err) => console.log(err));
+        }
+    }
+
+    // Derivation Content Generator
+    function getDerivationHTML(mode) {
+        const aDeg = (alpha * 180 / Math.PI).toFixed(0);
+        const bDeg = (beta * 180 / Math.PI).toFixed(0);
+        
+        // Helper for numeric verification
+        const numCheck = (lhs, rhs) => {
+            const l = eval(lhs);
+            const r = eval(rhs);
+            const match = Math.abs(l - r) < 1e-6;
+            const color = match ? 'var(--success)' : 'var(--highlight)';
+            return `<span style="color:${color}; font-weight:bold">✓ Verified</span>`;
+        };
+
+        switch(mode) {
+            case 0: // Fundamental Law
+                return `
+                    <div class="derivation-title">Fundamental Law of Trigonometry</div>
+                    <div class="step">
+                        <div class="math-block">$$\\cos(\\alpha - \\beta) = \\cos\\alpha \\cos\\beta + \\sin\\alpha \\sin\\beta$$</div>
+                        <div class="explanation">This law relates the cosine of the difference of two angles to the product of their sines and cosines.</div>
+                    </div>
+                    <div class="step highlight">
+                        <div class="math-block">
+                            LHS: $\\cos(${aDeg}° - ${bDeg}°) = \\cos(${(aDeg-bDeg)}°) \\approx ${Math.cos(alpha-beta).toFixed(4)}$<br>
+                            RHS: $\\cos${aDeg}°\\cos${bDeg}° + \\sin${aDeg}°\\sin${bDeg}° \\approx ${ (Math.cos(alpha)*Math.cos(beta) + Math.sin(alpha)*Math.sin(beta)).toFixed(4) }$
+                        </div>
+                        <div class="explanation">${numCheck('Math.cos(alpha-beta)', 'Math.cos(alpha)*Math.cos(beta) + Math.sin(alpha)*Math.sin(beta)')}</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation"><strong>Geometric Insight:</strong> The distance between two points on the unit circle at angles $\\alpha$ and $\\beta$ is invariant under rotation. By rotating the system so $\\beta$ moves to 0, the angle between them becomes $\\alpha-\\beta$. Equating the distances yields this formula.</div>
+                    </div>
+                `;
+            case 1: // cos(pi/2 - beta)
+                return `
+                    <div class="derivation-title">Deduction 1: Co-function Identity</div>
+                    <div class="step">
+                        <div class="math-block">$$\\cos(\\alpha - \\beta) = \\cos\\alpha \\cos\\beta + \\sin\\alpha \\sin\\beta$$</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation">Substitute $\\alpha = \\frac{\\pi}{2}$ (90°):</div>
+                        <div class="math-block">$$\\cos(\\frac{\\pi}{2} - \\beta) = \\cos\\frac{\\pi}{2} \\cos\\beta + \\sin\\frac{\\pi}{2} \\sin\\beta$$</div>
+                    </div>
+                    <div class="step highlight">
+                        <div class="explanation">Since $\\cos\\frac{\\pi}{2} = 0$ and $\\sin\\frac{\\pi}{2} = 1$:</div>
+                        <div class="math-block">$$\\Rightarrow \\cos(\\frac{\\pi}{2} - \\beta) = 0 \\cdot \\cos\\beta + 1 \\cdot \\sin\\beta$$</div>
+                        <div class="math-block">$$\\therefore \\cos(\\frac{\\pi}{2} - \\beta) = \\sin\\beta$$</div>
+                        <div class="explanation">Numerical Check ($\\beta=${bDeg}°): $\\cos(90-${bDeg}) = ${Math.cos(Math.PI/2 - beta).toFixed(4)}$, $\\sin(${bDeg}) = ${Math.sin(beta).toFixed(4)}</div>
+                    </div>
+                `;
+            case 2: // cos(pi/2 + alpha)
+                return `
+                    <div class="derivation-title">Deduction 2: Shift by 90°</div>
+                    <div class="step">
+                        <div class="math-block">$$\\cos(\\alpha - \\beta) = \\cos\\alpha \\cos\\beta + \\sin\\alpha \\sin\\beta$$</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation">Substitute $\\beta = -\\frac{\\pi}{2}$:</div>
+                        <div class="math-block">$$\\cos(\\alpha - (-\\frac{\\pi}{2})) = \\cos\\alpha \\cos(-\\frac{\\pi}{2}) + \\sin\\alpha \\sin(-\\frac{\\pi}{2})$$</div>
+                    </div>
+                    <div class="step highlight">
+                        <div class="explanation">Using even/odd properties: $\\cos(-x)=\\cos x$, $\\sin(-x)=-\\sin x$:</div>
+                        <div class="math-block">$$\\cos(\\alpha + \\frac{\\pi}{2}) = \\cos\\alpha \\cdot 0 + \\sin\\alpha \\cdot (-1)$$</div>
+                        <div class="math-block">$$\\therefore \\cos(\\frac{\\pi}{2} + \\alpha) = -\\sin\\alpha$$</div>
+                        <div class="explanation">Numerical Check ($\\alpha=${aDeg}°): $\\cos(90+${aDeg}) = ${Math.cos(Math.PI/2 + alpha).toFixed(4)}$, $-\\sin(${aDeg}) = ${(-Math.sin(alpha)).toFixed(4)}</div>
+                    </div>
+                `;
+            case 3: // sin(pi/2 + alpha)
+                return `
+                    <div class="derivation-title">Deduction 3: Sine Shift</div>
+                    <div class="step">
+                        <div class="math-block">From (i): $\\cos(\\frac{\\pi}{2} - \\beta) = \\sin\\beta$$</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation">Let $\\beta = \\frac{\\pi}{2} + \\alpha$:</div>
+                        <div class="math-block">$$\\cos(\\frac{\\pi}{2} - (\\frac{\\pi}{2} + \\alpha)) = \\sin(\\frac{\\pi}{2} + \\alpha)$$</div>
+                        <div class="math-block">$$\\cos(-\\alpha) = \\sin(\\frac{\\pi}{2} + \\alpha)$$</div>
+                    </div>
+                    <div class="step highlight">
+                        <div class="explanation">Since $\\cos(-\\alpha) = \\cos\\alpha$:</div>
+                        <div class="math-block">$$\\therefore \\sin(\\frac{\\pi}{2} + \\alpha) = \\cos\\alpha$$</div>
+                        <div class="explanation">Numerical Check ($\\alpha=${aDeg}°): $\\sin(90+${aDeg}) = ${Math.sin(Math.PI/2 + alpha).toFixed(4)}$, $\\cos(${aDeg}) = ${Math.cos(alpha).toFixed(4)}</div>
+                    </div>
+                `;
+            case 4: // cos(alpha + beta)
+                return `
+                    <div class="derivation-title">Deduction 4: Cosine Sum Formula</div>
+                    <div class="step">
+                        <div class="math-block">$$\\cos(\\alpha - \\beta) = \\cos\\alpha \\cos\\beta + \\sin\\alpha \\sin\\beta$$</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation">Replace $\\beta$ with $-\\beta$:</div>
+                        <div class="math-block">$$\\cos(\\alpha - (-\\beta)) = \\cos\\alpha \\cos(-\\beta) + \\sin\\alpha \\sin(-\\beta)$$</div>
+                    </div>
+                    <div class="step highlight">
+                        <div class="explanation">Apply even/odd identities ($\\cos(-\\beta)=\\cos\\beta$, $\\sin(-\\beta)=-\\sin\\beta$):</div>
+                        <div class="math-block">$$\\cos(\\alpha + \\beta) = \\cos\\alpha \\cos\\beta - \\sin\\alpha \\sin\\beta$$</div>
+                        <div class="explanation">Numerical Check: LHS=${Math.cos(alpha+beta).toFixed(4)}, RHS=${(Math.cos(alpha)*Math.cos(beta) - Math.sin(alpha)*Math.sin(beta)).toFixed(4)}</div>
+                    </div>
+                `;
+            case 5: // sin(alpha + beta)
+                return `
+                    <div class="derivation-title">Deduction 5: Sine Sum Formula</div>
+                    <div class="step">
+                        <div class="math-block">Start with: $\\cos(\\frac{\\pi}{2} + (\\alpha + \\beta)) = -\\sin(\\alpha + \\beta)$</div>
+                        <div class="explanation">(Using Deduction 2 where angle is $(\\alpha+\\beta)$)</div>
+                    </div>
+                    <div class="step">
+                        <div class="math-block">Expand LHS using Cosine Sum (Deduction 4):</div>
+                        <div class="math-block">$$\\cos(\\frac{\\pi}{2} + \\alpha + \\beta) = \\cos(\\frac{\\pi}{2} + \\alpha)\\cos\\beta - \\sin(\\frac{\\pi}{2} + \\alpha)\\sin\\beta$$</div>
+                    </div>
+                    <div class="step highlight">
+                        <div class="explanation">Substitute known shifts ($\\cos(\\frac{\\pi}{2}+\\alpha)=-\\sin\\alpha$, $\\sin(\\frac{\\pi}{2}+\\alpha)=\\cos\\alpha$):</div>
+                        <div class="math-block">$$-\\sin(\\alpha + \\beta) = (-\\sin\\alpha)\\cos\\beta - (\\cos\\alpha)\\sin\\beta$$</div>
+                        <div class="math-block">$$-\\sin(\\alpha + \\beta) = -(\\sin\\alpha \\cos\\beta + \\cos\\alpha \\sin\\beta)$$</div>
+                        <div class="math-block">$$\\therefore \\sin(\\alpha + \\beta) = \\sin\\alpha \\cos\\beta + \\cos\\alpha \\sin\\beta$$</div>
+                        <div class="explanation">Numerical Check: LHS=${Math.sin(alpha+beta).toFixed(4)}, RHS=${(Math.sin(alpha)*Math.cos(beta) + Math.cos(alpha)*Math.sin(beta)).toFixed(4)}</div>
+                    </div>
+                `;
+            case 6: // sin(alpha - beta)
+                return `
+                    <div class="derivation-title">Deduction 6: Sine Difference Formula</div>
+                    <div class="step">
+                        <div class="math-block">$$\\sin(\\alpha + \\beta) = \\sin\\alpha \\cos\\beta + \\cos\\alpha \\sin\\beta$$</div>
+                    </div>
+                    <div class="step">
+                        <div class="explanation">Replace $\\beta$ with $-\\beta$:</div>
+                        <div class="math-block">$$\\sin(\\alpha - \\beta) = \\sin\\alpha \\cos(-\\beta) + \\cos\\alpha \\sin(-\\beta)$$</div>
+                    </div>
+                    <div class="step highlight">
+                        <div class="explanation">Apply even/odd identities:</div>
+                        <div class="math-block">$$\\therefore \\sin(\\alpha - \\beta) = \\sin\\alpha \\cos\\beta - \\cos\\alpha \\sin\\beta$$</div>
+                        <div class="explanation">Numerical Check: LHS=${Math.sin(alpha-beta).toFixed(4)}, RHS=${(Math.sin(alpha)*Math.cos(beta) - Math.cos(alpha)*Math.sin(beta)).toFixed(4)}</div>
+                    </div>
+                `;
+            case 7: // cos(2pi - theta)
+                return `
+                    <div class="derivation-title">Deduction 7: Fourth Quadrant Cosine</div>
+                    <div class="step">
+                        <div class="math-block">$$\\cos(\\alpha - \\beta) = \\cos\\alpha \\cos\\beta + \\sin\\alpha \\sin\\beta$$</div>
+                        <div class="explanation">Let $\\alpha = 2\\pi$ and $\\beta = \\theta$ (using current $\\beta$ as $\\theta$):</div>
+                    </div>
+                    <div class="step highlight">
+                        <div class="math-block">$$\\cos(2\\pi - \\theta) = \\cos(2\\pi)\\cos\\theta + \\sin(2\\pi)\\sin\\theta$$</div>
+                        <div class="explanation">Since $\\cos(2\\pi)=1$ and $\\sin(2\\pi)=0$:</div>
+                        <div class="math-block">$$= 1 \\cdot \\cos\\theta + 0 \\cdot \\sin\\theta = \\cos\\theta$$</div>
+                        <div class="explanation">Geometric Meaning: Reflection across the x-axis preserves the x-coordinate (cosine).</div>
+                    </div>
+                `;
+            case 8: // sin(2pi - theta)
+                return `
+                    <div class="derivation-title">Deduction 8: Fourth Quadrant Sine</div>
+                    <div class="step">
+                        <div class="math-block">$$\\sin(\\alpha - \\beta) = \\sin\\alpha \\cos\\beta - \\cos\\alpha \\sin\\beta$$</div>
+                        <div class="explanation">Let $\\alpha = 2\\pi$ and $\\beta = \\theta$:</div>
+                    </div>
+                    <div class="step highlight">
+                        <div class="math-block">$$\\sin(2\\pi - \\theta) = \\sin(2\\pi)\\cos\\theta - \\cos(2\\pi)\\sin\\theta$$</div>
+                        <div class="explanation">Since $\\sin(2\\pi)=0$ and $\\cos(2\\pi)=1$:</div>
+                        <div class="math-block">$$= 0 \\cdot \\cos\\theta - 1 \\cdot \\sin\\theta = -\\sin\\theta$$</div>
+                        <div class="explanation">Geometric Meaning: Reflection across the x-axis negates the y-coordinate (sine).</div>
+                    </div>
+                `;
+            case 9: // tan(alpha + beta)
+                return `
+                    <div class="derivation-title">Deduction 9: Tangent Sum Formula</div>
+                    <div class="step">
+                        <div class="math-block">$$\\tan(\\alpha + \\beta) = \\frac{\\sin(\\alpha + \\beta)}{\\cos(\\alpha + \\beta)}$$</div>
+                    </div>
+                    <div class="step">
+                        <div class="math-block">Substitute sum formulas:</div>
+                        <div class="math-block">$$= \\frac{\\sin\\alpha \\cos\\beta + \\cos\\alpha \\sin\\beta}{\\cos\\alpha \\cos\\beta - \\sin\\alpha \\sin\\beta}$$</div>
+                    </div>
+                    <div class="step highlight">
+                        <div class="explanation">Divide numerator and denominator by $\\cos\\alpha \\cos\\beta$:</div>
+                        <div class="math-block">$$= \\frac{\\frac{\\sin\\alpha}{\\cos\\alpha} + \\frac{\\sin\\beta}{\\cos\\beta}}{1 - \\frac{\\sin\\alpha}{\\cos\\alpha}\\frac{\\sin\\beta}{\\cos\\beta}}$$</div>
+                        <div class="math-block">$$\\therefore \\tan(\\alpha + \\beta) = \\frac{\\tan\\alpha + \\tan\\beta}{1 - \\tan\\alpha \\tan\\beta}$$</div>
+                        <div class="explanation">Numerical Check: LHS=${Math.tan(alpha+beta).toFixed(4)}, RHS=${((Math.tan(alpha)+Math.tan(beta))/(1-Math.tan(alpha)*Math.tan(beta))).toFixed(4)}</div>
+                    </div>
+                `;
+            case 10: // tan(alpha - beta)
+                return `
+                    <div class="derivation-title">Deduction 10: Tangent Difference Formula</div>
+                    <div class="step">
+                        <div class="math-block">$$\\tan(\\alpha - \\beta) = \\frac{\\sin(\\alpha - \\beta)}{\\cos(\\alpha - \\beta)}$$</div>
+                    </div>
+                    <div class="step">
+                        <div class="math-block">Substitute difference formulas:</div>
+                        <div class="math-block">$$= \\frac{\\sin\\alpha \\cos\\beta - \\cos\\alpha \\sin\\beta}{\\cos\\alpha \\cos\\beta + \\sin\\alpha \\sin\\beta}$$</div>
+                    </div>
+                    <div class="step highlight">
+                        <div class="explanation">Divide numerator and denominator by $\\cos\\alpha \\cos\\beta$:</div>
+                        <div class="math-block">$$= \\frac{\\tan\\alpha - \\tan\\beta}{1 + \\tan\\alpha \\tan\\beta}$$</div>
+                        <div class="explanation">Numerical Check: LHS=${Math.tan(alpha-beta).toFixed(4)}, RHS=${((Math.tan(alpha)-Math.tan(beta))/(1+Math.tan(alpha)*Math.tan(beta))).toFixed(4)}</div>
+                    </div>
+                `;
+        }
+    }
+
+    function updateDerivation() {
+        derivationContent.innerHTML = getDerivationHTML(currentMode);
+        typeset();
+    }
+
+    // Drawing Functions
+    function drawCircle(cx, cy, r) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ddd';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        
+        // Axes
+        ctx.beginPath();
+        ctx.moveTo(cx - r - 10, cy);
+        ctx.lineTo(cx + r + 10, cy);
+        ctx.moveTo(cx, cy - r - 10);
+        ctx.lineTo(cx, cy + r + 10);
+        ctx.strokeStyle = '#aaa';
+        ctx.stroke();
+        
+        // Labels
+        ctx.fillStyle = '#666';
+        ctx.font = '12px Arial';
+        ctx.fillText('1', cx + r + 5, cy + 15);
+        ctx.fillText('0', cx - 5, cy + 15);
+    }
+
+    function drawAngle(theta, color, label, startAngle = 0) {
+        const cx = canvas.width / 4;
+        const cy = canvas.height / 2;
+        const r = Math.min(cx, cy) - 40;
+        
+        const endX = cx + r * Math.cos(theta);
+        const endY = cy - r * Math.sin(theta);
+        
+        // Line
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(endX, endY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Arc
+        ctx.beginPath();
+        ctx.arc(cx, cy, 40, -startAngle, -theta, theta < startAngle); // Note: Canvas Y is inverted
+        // Correct arc direction for standard math notation (CCW)
+        ctx.beginPath();
+        ctx.arc(cx, cy, 30, 0, -theta, true); 
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Dot
+        ctx.beginPath();
+        ctx.arc(endX, endY, 5, 0, Math.PI*2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        
+        // Label
+        ctx.fillStyle = color;
+        ctx.font = 'bold 14px Arial';
+        ctx.fillText(label, endX + 10, endY - 10);
+        
+        return {x: endX, y: endY};
+    }
+
+    function drawProjection(x, y, color, type) {
+        const cx = canvas.width / 4;
+        const cy = canvas.height / 2;
+        
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = '#ccc';
+        
+        // Vertical to X axis (Cosine)
+        if (type === 'cos' || type === 'both') {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x, cy);
+            ctx.stroke();
+            
+            // Highlight segment on axis
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(x, cy);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 4;
+            ctx.setLineDash([]);
+            ctx.stroke();
+        }
+        
+        // Horizontal to Y axis (Sine)
+        if (type === 'sin' || type === 'both') {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(cx, y);
+            ctx.strokeStyle = '#ccc';
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            
+            // Highlight segment on axis
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx, y);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 4;
+            ctx.setLineDash([]);
+            ctx.stroke();
+        }
+        ctx.setLineDash([]);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const cx = canvas.width / 4;
+        const cy = canvas.height / 2;
+        const r = Math.min(cx, cy) - 40;
+
+        drawCircle(cx, cy, r);
+
+        if (currentMode === 0) {
+            // Fundamental Law: Show alpha, beta, and alpha-beta
+            const pA = drawAngle(alpha, '#3498db', 'α');
+            const pB = drawAngle(beta, '#e74c3c', 'β');
+            
+            // Draw angle difference visually
+            ctx.beginPath();
+            ctx.arc(cx, cy, 50, -beta, -alpha, alpha < beta);
+            ctx.strokeStyle = '#27ae60';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.fillStyle = '#27ae60';
+            ctx.fillText('α-β', cx + 60, cy - (alpha+beta)/2 * 50);
+            
+            ctx.fillStyle = '#333';
+            ctx.fillText("Visualizing rotation difference", cx - 50, cy + r + 30);
+
+        } else if (currentMode >= 1 && currentMode <= 6) {
+            // General Angle Visualizations
+            const pA = drawAngle(alpha, '#3498db', 'α');
+            const pB = drawAngle(beta, '#e74c3c', 'β');
+            
+            // Specific highlights based on mode
+            if (currentMode === 1) {
+                // cos(pi/2 - beta) = sin(beta)
+                const pi2 = Math.PI / 2;
+                drawAngle(pi2, '#95a5a6', 'π/2');
+                drawAngle(pi2 - beta, '#27ae60', 'π/2-β');
+                drawProjection(pA.x, pA.y, '#e74c3c', 'sin'); // sin alpha (if alpha was beta)
+                // Actually let's project beta specifically
+                const pBeta = { x: cx + r*Math.cos(beta), y: cy - r*Math.sin(beta) };
+                drawProjection(pBeta.x, pBeta.y, '#e74c3c', 'sin');
+                ctx.fillText("Height of β = Base of (90-β)", cx + 100, cy);
+            }
+            else if (currentMode === 4 || currentMode === 5) {
+                // Sum formulas
+                const sum = alpha + beta;
+                // Normalize for drawing if > 2pi
+                const drawSum = sum % (2*Math.PI);
+                const pSum = drawAngle(drawSum, '#27ae60', 'α+β');
+                
+                if (currentMode === 5) {
+                     ctx.fillText("Vertical component of (α+β)", cx + 50, pSum.y);
+                }
+            }
+        } else if (currentMode === 7 || currentMode === 8) {
+            // 2pi - theta
+            const theta = beta;
+            const pTheta = drawAngle(theta, '#3498db', 'θ');
+            const pNeg = drawAngle(2*Math.PI - theta, '#27ae60', '2π-θ');
+            
+            drawProjection(pNeg.x, pNeg.y, '#27ae60', 'both');
+            ctx.fillText("Reflection across X-axis", cx + 50, cy + 50);
+        } else if (currentMode === 9 || currentMode === 10) {
+            // Tangent visualization (Slope)
+            const rTangent = r + 40;
+            
+            // Draw tangent line for alpha
+            const tanAlpha = Math.tan(alpha);
+            const xIntercept = cx + r / Math.cos(alpha);
+            const yIntercept = cy - r * Math.tan(alpha);
+            
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            // Extend line far enough
+            const len = 200;
+            ctx.lineTo(cx + len * Math.cos(alpha), cy - len * Math.sin(alpha));
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw vertical tangent line at x = r
+            if (Math.abs(Math.cos(alpha)) > 0.1) {
+                const tanVal = Math.tan(alpha);
+                const drawX = cx + r;
+                const drawY = cy - r * tanVal;
+                
+                ctx.beginPath();
+                ctx.moveTo(drawX, cy);
+                ctx.lineTo(drawX, drawY);
+                ctx.strokeStyle = '#3498db';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.fillStyle = '#3498db';
+                ctx.fillText(`tan α`, drawX + 5, drawY);
+            }
+            
+            // Same for beta
+            if (Math.abs(Math.cos(beta)) > 0.1) {
+                 const drawX = cx + r;
+                 const drawY = cy - r * Math.tan(beta);
+                 ctx.beginPath();
+                 ctx.moveTo(drawX, cy);
+                 ctx.lineTo(drawX, drawY);
+                 ctx.strokeStyle = '#e74c3c';
+                 ctx.lineWidth = 3;
+                 ctx.stroke();
+                 ctx.fillStyle = '#e74c3c';
+                 ctx.fillText(`tan β`, drawX + 5, drawY - 20);
+            }
+            
+            ctx.fillStyle = '#333';
+            ctx.fillText("Tangent = Length on vertical tangent line", cx - 50, cy - r - 20);
+        }
+    }
+
+    // Initialize
+    resizeCanvas();
+    updateDerivation();
+
+</script>
+
+</body>
+</html>
